@@ -3,26 +3,28 @@ from bs4 import BeautifulSoup
 
 
 def fetch_page(url):
+    """
+    Fetch page content and extract:
+    - title
+    - full text
+    - links
+    """
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+        headers = {"User-Agent": "Mozilla/5.0"}
 
-        r = requests.get(url, headers=headers, timeout=5)
-        r.raise_for_status()
+        response = requests.get(url, headers=headers, timeout=5)
+        response.raise_for_status()
 
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(response.text, "html.parser")
 
         title = soup.title.string.strip() if soup.title and soup.title.string else "No title"
         content = soup.get_text(" ", strip=True)
 
-        # 🔥 Extract links
-        links = []
-        for a in soup.find_all("a", href=True):
-            links.append(a["href"])
+        # collect all links
+        links = [a["href"] for a in soup.find_all("a", href=True)]
 
         return title, content, links
 
     except Exception as e:
-        print("Failed:", url, e)
+        print("Failed:", url)
         return "No title", "", []

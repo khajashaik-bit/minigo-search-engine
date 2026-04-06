@@ -6,33 +6,44 @@ from text_processing import clean_and_tokenize
 
 app = Flask(__name__)
 
-# ---------------- SNIPPET GENERATION ----------------
+
+# ---------------------- SNIPPET GENERATION ----------------------
 def generate_snippet(content, query_words, snippet_length=60):
+    """
+    Extract a small part of content around the first matched query word.
+    Also highlights query words in the snippet.
+    """
     content_lower = content.lower()
 
     for word in query_words:
         pos = content_lower.find(word.lower())
+
         if pos != -1:
             start = max(pos - snippet_length, 0)
             end = min(pos + snippet_length, len(content))
             snippet = content[start:end]
 
-            # Highlight words (case-insensitive)
+            # highlight words (case-insensitive)
             for w in query_words:
                 pattern = re.compile(re.escape(w), re.IGNORECASE)
                 snippet = pattern.sub(lambda m: f"<b>{m.group(0)}</b>", snippet)
 
             return "..." + snippet.strip() + "..."
 
+    # fallback if no match found
     return content[:150] + "..." if len(content) > 150 else content
 
 
-# ---------------- PAGERANK ----------------
+# ---------------------- PAGERANK ----------------------
 def compute_pagerank():
+    """
+    Basic PageRank implementation using link structure.
+    Each page distributes its rank to linked pages.
+    """
     conn = sqlite3.connect("search.db")
     cur = conn.cursor()
 
-    # Get pages
+    # get all pages
     cur.execute("SELECT id, url FROM pages")
     pages_data = cur.fetchall()
 
@@ -43,10 +54,11 @@ def compute_pagerank():
     if N == 0:
         return {}
 
+    # initial rank
     rank = {p: 1 / N for p in pages}
     damping = 0.85
 
-    # Build outgoing links
+    # build outgoing links map
     outgoing = {p: [] for p in pages}
 
     cur.execute("SELECT from_page, to_url FROM links")
@@ -54,7 +66,7 @@ def compute_pagerank():
         if to_url in url_to_id:
             outgoing[from_page].append(url_to_id[to_url])
 
-    # Iterations
+    # iterate multiple times
     for _ in range(10):
         new_rank = {p: (1 - damping) / N for p in pages}
 
@@ -64,6 +76,7 @@ def compute_pagerank():
                 for q in outgoing[p]:
                     new_rank[q] += damping * share
             else:
+                # if no outgoing links, distribute to all
                 for q in pages:
                     new_rank[q] += damping * (rank[p] / N)
 
@@ -73,8 +86,14 @@ def compute_pagerank():
     return rank
 
 
-# ---------------- SEARCH FUNCTION ----------------
+# ---------------------- SEARCH FUNCTION ----------------------
 def search_query(query):
+    """
+    Main search logic:
+    - tokenize query
+    - calculate TF-IDF score
+    - combine with PageRank
+    """
     query_words = clean_and_tokenize(query)
 
     conn = sqlite3.connect("search.db")
@@ -82,11 +101,11 @@ def search_query(query):
 
     scores = {}
 
-    # Total docs
+    # total documents
     cur.execute("SELECT COUNT(*) FROM pages")
     total_docs = cur.fetchone()[0]
 
-    # Compute PageRank
+    # get pagerank values
     pagerank = compute_pagerank()
 
     for word in query_words:
@@ -96,15 +115,20 @@ def search_query(query):
         if df == 0:
             continue
 
+        # smoothed idf
         idf = math.log((total_docs + 1) / (df + 1)) + 1
 
-        cur.execute("SELECT page_id, frequency FROM index_table WHERE word=?", (word,))
+        cur.execute(
+            "SELECT page_id, frequency FROM index_table WHERE word=?", (word,)
+        )
+
         for page_id, tf in cur.fetchall():
             tf_score = 1 + math.log(tf)
             score = tf_score * idf
+
             scores[page_id] = scores.get(page_id, 0) + score
 
-    # Sort by TF-IDF
+    # sort by TF-IDF
     sorted_pages = sorted(scores.items(), key=lambda item: item[1], reverse=True)
 
     results = []
@@ -116,11 +140,11 @@ def search_query(query):
         if row:
             title, url, content = row
 
-            # Phrase boost
+            # simple phrase boost
             if query.lower() in content.lower():
                 score += 5
 
-            # Add PageRank
+            # combine with pagerank
             final_score = score + pagerank.get(page_id, 0)
 
             snippet = generate_snippet(content, query_words)
@@ -131,8 +155,12 @@ def search_query(query):
     return results
 
 
-# ---------------- SUGGESTIONS ----------------
+# ---------------------- SUGGESTIONS ----------------------
 def get_suggestions(prefix):
+    """
+    Return top matching words starting with given prefix.
+    Used for autocomplete suggestions.
+    """
     conn = sqlite3.connect("search.db")
     cur = conn.cursor()
 
@@ -145,13 +173,13 @@ def get_suggestions(prefix):
         LIMIT 5
     """, (prefix + "%",))
 
-    results = [row[0] for row in cur.fetchall()]
+    suggestions = [row[0] for row in cur.fetchall()]
+
     conn.close()
+    return suggestions
 
-    return results
 
-
-# ---------------- ROUTES ----------------
+# ---------------------- ROUTES ----------------------
 @app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
@@ -161,11 +189,17 @@ def home():
 def results():
     query = request.values.get("query", "")
 
+    # redirect POST -> GET (clean URL)
     if request.method == "POST":
         return redirect(url_for("results", query=query))
 
     results_data = search_query(query) if query else []
-    return render_template("results.html", query=query, results=results_data)
+
+    return render_template(
+        "results.html",
+        query=query,
+        results=results_data
+    )
 
 
 @app.route("/suggest")
@@ -175,6 +209,6 @@ def suggest():
     return {"suggestions": suggestions}
 
 
-# ---------------- RUN APP ----------------
+# ---------------------- MAIN ----------------------
 if __name__ == "__main__":
     app.run(debug=True)
