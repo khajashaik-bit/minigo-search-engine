@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python Search Engine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            margin-right: 40px;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        /* Logo + search bar container */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 150px;
+        }
+
+        .search-form {
+            flex: 1;
+            display: flex;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px 0 0 24px;
+            outline: none;
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            border: 1px solid #dfe1e5;
+            border-left: none;
+            border-radius: 0 24px 24px 0;
+            background: #8fb1d3;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-button:hover {
+            background: #0697df;
+        }
+
+        /* Tiles / Cards */
+        .result-tile {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+
+        .result-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-tile a {
+            font-size: 18px;
+            color: #1a0dab;
+            text-decoration: none;
+        }
+
+        .result-tile a:hover {
+            text-decoration: underline;
+        }
+
+        .url {
+            color: #006621;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .snippet {
+            font-size: 14px;
+            color: #545454;
+            margin-bottom: 8px;
+        }
+
+        .score {
+            color: #888;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo + Search bar -->
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
+            <form method="POST" action="{{ url_for('results') }}" class="search-form">
+                <input type="text" name="query" class="search-input" value="{{ query }}" placeholder="Search...">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+
+        <!-- Search results -->
+        {% if results %}
+            {% for title, url, score, snippet in results %}
+                <div class="result-tile">
+                    <a href="{{ url }}" target="_blank">{{ title }}</a>
+                    <div class="url">{{ url }}</div>
+                    <div class="snippet">{{ snippet | safe }}</div>
+                    <div class="score">Relevance: {{ score }}</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No results found for "{{ query }}".</p>
+        {% endif %}
+    </div>
+</body>
+</html>

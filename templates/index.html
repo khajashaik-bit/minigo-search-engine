@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniGo</title>
+    <link rel="icon" href="/static/logo.png">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo img {
+            max-width: 35%;
+            height: auto;
+            margin-right: 90px;
+        }
+
+        .search-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            width: 60vw;
+            max-width: 520px;
+            min-width: 260px;
+            padding: 12px;
+            font-size: 17px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 17px;
+            margin-left: 10px;
+            background-color: #4285F4;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3367D6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo">
+        <img src="/static/logo.png" alt="MiniGo Logo">
+    </div>
+
+    <form method="GET" action="/results" class="search-area">
+        <input id="query" type="text" name="query" placeholder="Search..." required>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
+
