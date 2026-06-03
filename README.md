@@ -19,7 +19,7 @@ A simple, lightweight web search engine built from scratch using **Python**, **F
 
 MiniGo separates its workflow into two core processes: **Indexing** (offline data preparation) and **Searching** (runtime execution).
 
-![MiniGo Search Engine Architecture](assets/architecture.png)
+![MiniGo Search Engine Architecture](assets/Architecture.png)
 
 ### The 7-Step Pipeline:
 1. **Read & Clean Documents:** Ingests raw documents or web pages, extracting raw text and discarding irrelevant markup.
@@ -46,11 +46,11 @@ MiniGo separates its workflow into two core processes: **Indexing** (offline dat
 
 ### Home Page UI
 A minimalist, modern search bar layout designed for immediate entry.
-![MiniGo Home Page UI](assets/home.png)
+![MiniGo Home Page UI](assets/homepage.png)
 
 ### Search Results Interface
 Renders clean text snippets alongside calculated page link targets and precise algorithmic relevance scores.
-![MiniGo Search Results Interface](assets/results.png)
+![MiniGo Search Results Interface](assets/search_results.png)
 
 ---
 
