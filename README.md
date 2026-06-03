@@ -2,7 +2,7 @@
 
 A simple, lightweight web search engine built from scratch using **Python**, **Flask**, and **SQLite**. 
 
-🚀 **[Live Demo on Hugging Face Spaces](https://huggingface.co)**
+🚀 **[Live Demo on Hugging Face Spaces](kshaik4212/Minigo)**
 
 ---
 
