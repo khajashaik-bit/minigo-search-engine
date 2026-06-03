@@ -6,6 +6,15 @@ A simple, lightweight web search engine built from scratch using **Python**, **F
 
 ---
 
+## 🎯 Scope & Dataset
+
+* **Narrow Search Focus:** This is a specialized, niche search engine.
+* **Target Index:** It crawls a limited pool of targeted web pages.
+* **Content Domain:** All indexed data centers strictly around **Python tutorials**.
+* **Live Sources:** Explores high-quality resource domains like GeeksforGeeks and w3resource.
+
+---
+
 ## 📐 Architecture Overview
 
 MiniGo separates its workflow into two core processes: **Indexing** (offline data preparation) and **Searching** (runtime execution).
